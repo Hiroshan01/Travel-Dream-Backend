@@ -2,14 +2,15 @@ import nodemailer from "nodemailer";
 import dotenv from "dotenv";
 
 dotenv.config();
+
+// SendGrid Configuration
 const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
+  host: "smtp.sendgrid.net",
   port: 587,
-  secure: false, // use TLS
-  requireTLS: true, // enforce TLS
+  secure: false,
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS, // app password if 2FA enabled
+    user: "apikey", // MUST be literally "apikey" - don't change this!
+    pass: process.env.SENDGRID_API_KEY, // Your actual API key from .env
   },
 });
 
@@ -18,7 +19,7 @@ transporter.verify((error, success) => {
   if (error) {
     console.error("Email configuration error:", error);
   } else {
-    console.log("Email server is ready to send messages");
+    console.log("SendGrid email server is ready to send messages");
   }
 });
 
@@ -48,10 +49,7 @@ export const sendBookingConfirmation = async (bookingData) => {
   const kidAgesText = kid_ages ? ` (Ages: ${kid_ages})` : "";
 
   const mailOptions = {
-    from: {
-      name: "Travel Dream",
-      address: process.env.EMAIL_USER,
-    },
+    from: "hiroshandev@gmail.com", // Must exactly match your verified sender
     to: email,
     subject: `🎉 Booking Confirmation - TravelDream Ceylon Journey`,
     html: `
@@ -162,11 +160,8 @@ export const sendAdminNotification = async (bookingData) => {
   const kidAgesText = kid_ages ? ` (Ages: ${kid_ages})` : "";
 
   const mailOptions = {
-    from: {
-      name: "TravelDream Booking System",
-      address: process.env.EMAIL_USER,
-    },
-    to: process.env.ADMIN_EMAIL,
+    from: "hiroshandev@gmail.com", // Must exactly match your verified sender
+    to: "hiroshandev@gmail.com", // Admin email
     subject: `🔔 New Booking: ${name} - ${formatDate(arrival)}`,
     html: `
       <!DOCTYPE html>
@@ -267,11 +262,8 @@ export const sendAdminFeedNoti = async (feedbackData) => {
   const { location, rating, experience, email } = feedbackData;
 
   const mailOptions = {
-    from: {
-      name: "TravelDream Feedback System",
-      address: process.env.EMAIL_USER,
-    },
-    to: process.env.ADMIN_EMAIL,
+    from: "hiroshandev@gmail.com", // Must exactly match your verified sender
+    to: "hiroshandev@gmail.com", // Admin email
     subject: `⭐ New Travel Feedback: ${location} - ${rating}/5 stars`,
     html: `
       <!DOCTYPE html>
