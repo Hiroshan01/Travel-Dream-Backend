@@ -1,16 +1,10 @@
-import nodemailer from "nodemailer";
+import sgMail from "@sendgrid/mail";
 import dotenv from "dotenv";
 
 dotenv.config();
-const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 587,
-  secure: false, // use TLS
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
+
+// Configure SendGrid
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 const formatDate = (dateString) => {
   const date = new Date(dateString);
@@ -21,7 +15,6 @@ const formatDate = (dateString) => {
   });
 };
 
-// Send booking confirmation to customer
 export const sendBookingConfirmation = async (bookingData) => {
   const {
     name,
@@ -37,12 +30,12 @@ export const sendBookingConfirmation = async (bookingData) => {
 
   const kidAgesText = kid_ages ? ` (Ages: ${kid_ages})` : "";
 
-  const mailOptions = {
-    from: {
-      name: "Travel Dream",
-      address: process.env.EMAIL_USER,
-    },
+  const msg = {
     to: email,
+    from: {
+      email: process.env.SENDGRID_FROM_EMAIL,
+      name: "Travel Dream",
+    },
     subject: `🎉 Booking Confirmation - TravelDream Ceylon Journey`,
     html: `
       <!DOCTYPE html>
@@ -126,16 +119,18 @@ export const sendBookingConfirmation = async (bookingData) => {
   };
 
   try {
-    const info = await transporter.sendMail(mailOptions);
-    console.log("Customer email sent successfully:", info.messageId);
-    return { success: true, messageId: info.messageId };
+    await sgMail.send(msg);
+    console.log("Customer email sent successfully via SendGrid");
+    return { success: true };
   } catch (error) {
     console.error("Error sending customer email:", error.message);
-    throw new Error(`Failed to send customer email: ${error.message}`);
+    if (error.response) {
+      console.error("SendGrid error details:", error.response.body);
+    }
+    return { success: false, error: error.message };
   }
 };
 
-// Send notification to admin
 export const sendAdminNotification = async (bookingData) => {
   const {
     name,
@@ -151,12 +146,12 @@ export const sendAdminNotification = async (bookingData) => {
 
   const kidAgesText = kid_ages ? ` (Ages: ${kid_ages})` : "";
 
-  const mailOptions = {
-    from: {
-      name: "TravelDream Booking System",
-      address: process.env.EMAIL_USER,
-    },
+  const msg = {
     to: process.env.ADMIN_EMAIL,
+    from: {
+      email: process.env.SENDGRID_FROM_EMAIL,
+      name: "TravelDream Booking System",
+    },
     subject: `🔔 New Booking: ${name} - ${formatDate(arrival)}`,
     html: `
       <!DOCTYPE html>
@@ -243,25 +238,27 @@ export const sendAdminNotification = async (bookingData) => {
   };
 
   try {
-    const info = await transporter.sendMail(mailOptions);
-    console.log("Admin email sent successfully:", info.messageId);
-    return { success: true, messageId: info.messageId };
+    await sgMail.send(msg);
+    console.log("Admin email sent successfully via SendGrid");
+    return { success: true };
   } catch (error) {
     console.error("Error sending admin email:", error.message);
-    throw new Error(`Failed to send admin email: ${error.message}`);
+    if (error.response) {
+      console.error("SendGrid error details:", error.response.body);
+    }
+    return { success: false, error: error.message };
   }
 };
 
-// Send feedback notification to admin
 export const sendAdminFeedNoti = async (feedbackData) => {
   const { location, rating, experience, email } = feedbackData;
 
-  const mailOptions = {
-    from: {
-      name: "TravelDream Feedback System",
-      address: process.env.EMAIL_USER,
-    },
+  const msg = {
     to: process.env.ADMIN_EMAIL,
+    from: {
+      email: process.env.SENDGRID_FROM_EMAIL,
+      name: "TravelDream Feedback System",
+    },
     subject: `⭐ New Travel Feedback: ${location} - ${rating}/5 stars`,
     html: `
       <!DOCTYPE html>
@@ -310,11 +307,14 @@ export const sendAdminFeedNoti = async (feedbackData) => {
   };
 
   try {
-    const info = await transporter.sendMail(mailOptions);
-    console.log("Feedback email sent successfully:", info.messageId);
-    return { success: true, messageId: info.messageId };
+    await sgMail.send(msg);
+    console.log("Feedback email sent successfully via SendGrid");
+    return { success: true };
   } catch (error) {
     console.error("Error sending feedback email:", error.message);
-    throw new Error(`Failed to send feedback email: ${error.message}`);
+    if (error.response) {
+      console.error("SendGrid error details:", error.response.body);
+    }
+    return { success: false, error: error.message };
   }
 };
