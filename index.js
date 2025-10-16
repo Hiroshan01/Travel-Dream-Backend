@@ -17,10 +17,11 @@ app.use(express.urlencoded({ extended: true }));
 // JWT middleware
 
 //Routers
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "OK", timestamp: new Date().toISOString() });
+});
 app.use("/api/booking", bookingRoute);
 app.use("/api/feedback", feedRbackRoute);
-// app.use("/api/products", productRoute)
-// app.use("/api/orders", orderRoute)
 
 app.listen(PORT, () => {
   console.log(`Server is running on ${PORT}`);
