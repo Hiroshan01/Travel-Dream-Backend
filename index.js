@@ -17,12 +17,23 @@ app.use(express.urlencoded({ extended: true }));
 // JWT middleware
 
 //Routers
+app.get("/", (req, res) => {
+  res.json({
+    message: "TravelDream API",
+    status: "Running",
+    endpoints: {
+      health: "/health",
+      booking: "/api/booking",
+      feedback: "/api/feedback",
+    },
+  });
+});
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "OK", timestamp: new Date().toISOString() });
 });
 app.use("/api/booking", bookingRoute);
 app.use("/api/feedback", feedRbackRoute);
 
-app.listen(PORT, () => {
-  console.log(`Server is running on ${PORT}`);
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Server is running on port ${PORT}`);
 });
