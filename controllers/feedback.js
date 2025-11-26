@@ -33,7 +33,7 @@ export async function feedback(req, res) {
 
     const feedbackData = {
       location,
-      rating: ratingNum, // Convert to number
+      rating: ratingNum, 
       experience,
       email,
     };
